@@ -1,0 +1,264 @@
+import React, { useState } from 'react';
+import { ShoppingCart, Menu, X, Plus, Minus, Trash2 } from 'lucide-react';
+
+const RestaurantWebsite = () => {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [cartItems, setCartItems] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const menuData = {
+    burgers: [
+      { id: 1, name: 'Classic Burger', price: 8.99, image: '🍔', desc: 'Beef patty with lettuce, tomato, pickles' },
+      { id: 2, name: 'Double Deluxe', price: 10.99, image: '🍔', desc: 'Two beef patties, cheese, bacon, special sauce' },
+      { id: 3, name: 'Spicy Inferno', price: 9.99, image: '🌶️', desc: 'Spicy beef, jalapeños, pepper jack cheese' },
+      { id: 4, name: 'Mushroom Swiss', price: 10.49, image: '🍄', desc: 'Beef with sautéed mushrooms and swiss cheese' },
+    ],
+    chicken: [
+      { id: 5, name: 'Crispy Chicken Sandwich', price: 9.49, image: '🍗', desc: 'Golden fried chicken breast, mayo, lettuce' },
+      { id: 6, name: 'Grilled Chicken', price: 8.99, image: '🍗', desc: 'Grilled chicken, tomato, light mayo' },
+      { id: 7, name: 'Spicy Chicken Deluxe', price: 9.99, image: '🌶️', desc: 'Crispy spicy chicken with sriracha mayo' },
+    ],
+    sides: [
+      { id: 8, name: 'French Fries', price: 3.49, image: '🍟', desc: 'Golden crispy fries, salted to perfection' },
+      { id: 9, name: 'Sweet Potato Fries', price: 4.49, image: '🍠', desc: 'Crispy sweet potato with chipotle mayo' },
+      { id: 10, name: 'Onion Rings', price: 3.99, image: '🧅', desc: 'Golden fried onion rings' },
+      { id: 11, name: 'Coleslaw', price: 2.99, image: '🥗', desc: 'Fresh crispy coleslaw' },
+    ],
+    drinks: [
+      { id: 12, name: 'Coca Cola', price: 2.49, image: '🥤', desc: 'Ice cold cola - Small' },
+      { id: 13, name: 'Orange Juice', price: 2.99, image: '🧃', desc: 'Fresh orange juice - Small' },
+      { id: 14, name: 'Shake - Vanilla', price: 4.99, image: '🥛', desc: 'Creamy vanilla milkshake' },
+      { id: 15, name: 'Shake - Chocolate', price: 4.99, image: '🍫', desc: 'Rich chocolate milkshake' },
+    ],
+    desserts: [
+      { id: 16, name: 'Apple Pie', price: 3.49, image: '🥧', desc: 'Warm apple pie with vanilla ice cream' },
+      { id: 17, name: 'Chocolate Brownie', price: 4.49, image: '🍫', desc: 'Fudgy chocolate brownie' },
+      { id: 18, name: 'Cheesecake', price: 5.99, image: '🎂', desc: 'New York style cheesecake' },
+    ],
+  };
+
+  const allItems = Object.values(menuData).flat();
+  const displayItems = selectedCategory === 'all' ? allItems : menuData[selectedCategory];
+
+  const addToCart = (item) => {
+    const existing = cartItems.find(i => i.id === item.id);
+    if (existing) {
+      setCartItems(cartItems.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i));
+    } else {
+      setCartItems([...cartItems, { ...item, qty: 1 }]);
+    }
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems(cartItems.filter(i => i.id !== id));
+  };
+
+  const updateQuantity = (id, qty) => {
+    if (qty <= 0) {
+      removeFromCart(id);
+    } else {
+      setCartItems(cartItems.map(i => i.id === id ? { ...i, qty } : i));
+    }
+  };
+
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0).toFixed(2);
+  const itemCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Header */}
+      <header className="bg-black/40 backdrop-blur-md border-b border-orange-500/20 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+              FastBite
+            </div>
+            <span className="text-2xl">🍔</span>
+          </div>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex gap-6">
+            {['Home', 'Menu', 'About', 'Contact'].map(item => (
+              <a key={item} href="#" className="text-gray-300 hover:text-orange-400 transition">
+                {item}
+              </a>
+            ))}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-gray-300"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {/* Cart Button */}
+          <button
+            onClick={() => setCartOpen(!cartOpen)}
+            className="relative p-2 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 transition"
+          >
+            <ShoppingCart size={24} className="text-orange-400" />
+            {itemCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {itemCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-black/60 border-t border-orange-500/20 px-4 py-4 flex flex-col gap-3">
+            {['Home', 'Menu', 'About', 'Contact'].map(item => (
+              <a key={item} href="#" className="text-gray-300 hover:text-orange-400">
+                {item}
+              </a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div className="flex">
+        {/* Main Content */}
+        <main className="flex-1">
+          {/* Hero Section */}
+          <section className="relative px-4 py-20 text-center overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent pointer-events-none" />
+            <div className="max-w-2xl mx-auto relative z-10">
+              <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-400 via-red-400 to-orange-500 bg-clip-text text-transparent mb-4">
+                Hungry? Order Now!
+              </h1>
+              <p className="text-gray-300 text-lg mb-8">
+                Fresh, delicious food delivered fast. Scroll down to explore our menu.
+              </p>
+            </div>
+          </section>
+
+          {/* Category Filter */}
+          <section className="px-4 mb-12">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-wrap gap-3 justify-center">
+                {['all', 'burgers', 'chicken', 'sides', 'drinks', 'desserts'].map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-6 py-2 rounded-full font-semibold transition ${
+                      selectedCategory === cat
+                        ? 'bg-gradient-to-r from-orange-400 to-red-500 text-white'
+                        : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Menu Grid */}
+          <section className="px-4 pb-20">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayItems.map(item => (
+                  <div
+                    key={item.id}
+                    className="group bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-xl p-6 border border-orange-500/20 hover:border-orange-500/50 transition hover:shadow-lg hover:shadow-orange-500/10 overflow-hidden"
+                  >
+                    <div className="text-6xl mb-4 group-hover:scale-110 transition transform">{item.image}</div>
+                    <h3 className="text-xl font-bold text-white mb-2">{item.name}</h3>
+                    <p className="text-gray-400 text-sm mb-4">{item.desc}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-orange-400">${item.price}</span>
+                      <button
+                        onClick={() => addToCart(item)}
+                        className="bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 text-white px-4 py-2 rounded-lg font-semibold transition transform hover:scale-105"
+                      >
+                        <Plus size={20} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* Cart Sidebar */}
+        {cartOpen && (
+          <div className="fixed right-0 top-0 h-full w-96 bg-gradient-to-b from-slate-800 to-slate-900 border-l border-orange-500/20 z-50 overflow-y-auto">
+            <div className="sticky top-0 bg-black/60 backdrop-blur px-6 py-4 border-b border-orange-500/20 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Your Cart</h2>
+              <button onClick={() => setCartOpen(false)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {cartItems.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">Your cart is empty</p>
+              ) : (
+                <>
+                  <div className="space-y-4 mb-6">
+                    {cartItems.map(item => (
+                      <div key={item.id} className="bg-slate-700/30 rounded-lg p-4 border border-orange-500/10">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <p className="font-bold text-white">{item.name}</p>
+                            <p className="text-orange-400 font-semibold">${item.price}</p>
+                          </div>
+                          <button
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.qty - 1)}
+                            className="bg-slate-600 hover:bg-slate-500 text-white p-1 rounded"
+                          >
+                            <Minus size={16} />
+                          </button>
+                          <span className="text-white font-bold flex-1 text-center">{item.qty}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.qty + 1)}
+                            className="bg-orange-500 hover:bg-orange-600 text-white p-1 rounded"
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-orange-500/20 pt-6 space-y-3">
+                    <div className="flex justify-between text-gray-300">
+                      <span>Subtotal:</span>
+                      <span>${total}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-300">
+                      <span>Tax:</span>
+                      <span>${(total * 0.08).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-white font-bold text-lg bg-gradient-to-r from-orange-400/20 to-red-500/20 p-3 rounded-lg">
+                      <span>Total:</span>
+                      <span>${(parseFloat(total) + parseFloat(total) * 0.08).toFixed(2)}</span>
+                    </div>
+                    <button className="w-full bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 text-white font-bold py-3 rounded-lg transition transform hover:scale-105">
+                      Checkout
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default RestaurantWebsite;
